@@ -1,5 +1,5 @@
 ---
-title: Out-of-process gears (gRPC)
+title: Out-of-process gears (REST/gRPC)
 description: Run a gear as a separate gRPC service behind the same SDK trait, selected by configuration.
 sidebar:
   label: Out-of-process (gRPC)
