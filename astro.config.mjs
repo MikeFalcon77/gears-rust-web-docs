@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lunaria from './config/lunaria-starlight.mjs';
 
 // GitHub Pages URL: https://constructorfabric.github.io/gears-rust-web-docs
 // Content links are authored relative (../guides/...) in gears-rust, so they
@@ -22,25 +21,17 @@ export default defineConfig({
       title: 'Gears',
       description:
         'Documentation for Constructor Fabric Gears — a Rust runtime for composable, secure-by-default platform components.',
-      // i18n infrastructure. `root` keeps English at `/` (no `/en/` prefix), so
-      // existing links and the link-checker keep working. Adding a language is
-      // one line here (e.g. `de: { label: 'Deutsch', lang: 'de' }`) plus a
-      // matching entry in lunaria.config.json and a src/content/docs/<lang>/ dir.
-      // `ru` is wired up as an example target so the /i18n dashboard renders.
+      // `root` keeps English at `/` (no `/en/` prefix). i18n can be enabled
+      // later by adding locales here and a matching src/content/docs/<lang>/ dir.
       defaultLocale: 'root',
       locales: {
         root: { label: 'English', lang: 'en' },
-        ru: { label: 'Русский', lang: 'ru' },
       },
       // "Edit page" links point at the source in gears-rust, not this docs repo.
       // Users edit in the source repo (docs/web-docs/), then sync handles the update.
       editLink: {
         baseUrl: 'https://github.com/constructorfabric/gears-rust/edit/main/docs/web-docs/',
       },
-      // Renders the Lunaria translation-status dashboard at /i18n during
-      // `astro build` (no separate CLI step). `sync: false` keeps
-      // lunaria.config.json authoritative.
-      plugins: [lunaria({ route: '/i18n', sync: false })],
       logo: {
         src: './src/assets/gears-logo.svg',
         alt: 'Gears',

@@ -12,6 +12,23 @@ const withBase = (p) => `${base}${p}`
 
 const ASSET_EXT_RE = /\.(png|jpe?g|gif|svg|webp|ico|pdf|json|ya?ml|zip|tar|gz|mp4|webm|mov|mp3|ogg)$/i
 
+const EDIT_URL_BASE = (
+  process.env.EDIT_URL_BASE ?? 'https://github.com/constructorfabric/gears-rust/edit/main/docs/web-docs/'
+).replace(/\/+$/, '') + '/'
+
+function getFrontmatterBounds(content) {
+  if (!content.startsWith('---')) return null
+  const match = content.match(/^---(\r?\n)([\s\S]*?)\r?\n---(\r?\n?)/)
+  if (!match) return null
+  const eol = match[1]
+  const fullMatch = match[0]
+  const end = fullMatch.length
+  const closeStart = fullMatch.lastIndexOf('---')
+  const bodyStart = '---'.length + eol.length
+  const bodyEnd = closeStart - eol.length
+  return { start: 0, end, bodyStart, bodyEnd, body: match[2], eol }
+}
+
 function walkDir(dir) {
   const files = []
   const entries = readdirSync(dir, { withFileTypes: true })
@@ -88,6 +105,8 @@ function syncFile(relPath) {
   // Rewrite relative asset paths that climb out of the content tree.
   content = rewriteAssetPaths(content, fileDir)
 
+  const fm = getFrontmatterBounds(content)
+
   // Add synced comment after frontmatter if file is markdown
   if (!content.includes('synced from')) {
     const sha = process.env.GITHUB_SHA || 'local'
@@ -96,20 +115,27 @@ function syncFile(relPath) {
     const syncComment = ismdx ? `{/* synced from gears-rust @ ${sha} */}` : `<!-- synced from gears-rust @ ${sha} -->`
 
     // If file has frontmatter, insert comment after it
-    if (content.startsWith('---')) {
-      const closeIdx = content.indexOf('\n---\n', 3)
-      if (closeIdx !== -1) {
-        // Insert after the closing ---
-        const insertPos = closeIdx + 5 // length of '\n---\n'
-        content = content.slice(0, insertPos) + '\n' + syncComment + '\n' + content.slice(insertPos)
-      } else {
-        // Fallback: prepend if closing --- not found
-        content = syncComment + '\n' + content
-      }
+    if (fm) {
+      content = content.slice(0, fm.end) + fm.eol + syncComment + fm.eol + content.slice(fm.end)
     } else {
       // No frontmatter: prepend
       content = syncComment + '\n' + content
     }
+  }
+
+  // Override Starlight's edit link so it points at the source file in gears-rust
+  // rather than the local src/content/docs/ copy.
+  const editUrl = new URL(relPath, EDIT_URL_BASE).href
+  if (fm) {
+    const editUrlPattern = /^editUrl:.*$/m
+    if (editUrlPattern.test(fm.body)) {
+      const newBody = content.slice(fm.bodyStart, fm.bodyEnd).replace(editUrlPattern, `editUrl: ${editUrl}`)
+      content = content.slice(0, fm.bodyStart) + newBody + content.slice(fm.bodyEnd)
+    } else {
+      content = content.slice(0, fm.bodyEnd) + fm.eol + `editUrl: ${editUrl}` + content.slice(fm.bodyEnd)
+    }
+  } else {
+    content = `---\neditUrl: ${editUrl}\n---\n\n${content}`
   }
 
   // Write to target
