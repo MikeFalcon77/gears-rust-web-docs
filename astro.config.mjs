@@ -1,14 +1,17 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import lunaria from './config/lunaria-starlight.mjs';
+
+// GitHub Pages URL: https://constructorfabric.github.io/gears-rust-web-docs
+// Content links are authored relative (../guides/...) in gears-rust, so they
+// resolve correctly under this base path and would also work at a root custom
+// domain. For a custom domain (gears.dev) drop `base` and set site accordingly.
+const BASE = process.env.BASE ?? '/gears-rust-web-docs';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://gears.dev',
-  // GitHub Pages URL: https://constructorfabric.github.io/gears-rust-web-docs
-  // base is set to empty string for custom domain, or '/gears-rust-web-docs' for Pages.
-  // base: '/gears-rust-web-docs',
+  site: 'https://constructorfabric.github.io',
+  base: BASE,
   // Emit all stylesheets as files (don't inline small ones). Avoids an
   // Expressive Code asset-hash mismatch on pages whose code blocks are all
   // plaintext, which otherwise produced a 404 link to an un-emitted CSS file.
@@ -18,25 +21,17 @@ export default defineConfig({
       title: 'Gears',
       description:
         'Documentation for Constructor Fabric Gears — a Rust runtime for composable, secure-by-default platform components.',
-      // i18n infrastructure. `root` keeps English at `/` (no `/en/` prefix), so
-      // existing links and the link-checker keep working. Adding a language is
-      // one line here (e.g. `de: { label: 'Deutsch', lang: 'de' }`) plus a
-      // matching entry in lunaria.config.json and a src/content/docs/<lang>/ dir.
-      // `ru` is wired up as an example target so the /i18n dashboard renders.
+      // `root` keeps English at `/` (no `/en/` prefix). i18n can be enabled
+      // later by adding locales here and a matching src/content/docs/<lang>/ dir.
       defaultLocale: 'root',
       locales: {
         root: { label: 'English', lang: 'en' },
-        ru: { label: 'Русский', lang: 'ru' },
       },
       // "Edit page" links point at the source in gears-rust, not this docs repo.
       // Users edit in the source repo (docs/web-docs/), then sync handles the update.
       editLink: {
         baseUrl: 'https://github.com/constructorfabric/gears-rust/edit/main/docs/web-docs/',
       },
-      // Renders the Lunaria translation-status dashboard at /i18n during
-      // `astro build` (no separate CLI step). `sync: false` keeps
-      // lunaria.config.json authoritative.
-      plugins: [lunaria({ route: '/i18n', sync: false })],
       logo: {
         src: './src/assets/gears-logo.svg',
         alt: 'Gears',
