@@ -1,7 +1,7 @@
 {
   "recurse": true,
   "silent": true,
-  "skip": ["github\\.com", "gears\\.dev", "constructor\\.com"],
+  "skip": ["github\\.com", "gears\\.dev", "constructor\\.com", "/i18n/"],
   "urlRewriteSearch": "(?:https://constructorfabric\\.github\\.io)?/gears-rust-web-docs/",
   "urlRewriteReplace": "/"
 }

@@ -42,6 +42,7 @@ jobs:
           ref: ${{ github.event.client_payload.sha || 'main' }}
           path: tmp/gears-rust
 
+      - run: pnpm sync
       - run: pnpm build
 
       - uses: actions/upload-pages-artifact@v3
